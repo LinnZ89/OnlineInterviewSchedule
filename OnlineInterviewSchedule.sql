@@ -1,0 +1,41 @@
+CREATE TABLE Users (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Username NVARCHAR(50) UNIQUE NOT NULL,
+    Password NVARCHAR(255) NOT NULL,
+    Role NVARCHAR(20) CHECK (Role IN ('CANDIDATE', 'RECRUITER')) NOT NULL
+);
+
+CREATE TABLE Jobs (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    RecruiterId INT NOT NULL,
+    Title NVARCHAR(100) NOT NULL,
+    Description NVARCHAR(MAX) NOT NULL,
+    Location NVARCHAR(100),
+    Industry NVARCHAR(50),
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (RecruiterId) REFERENCES Users(Id)
+);
+
+CREATE TABLE InterviewSlots (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    RecruiterId INT NOT NULL,
+    CandidateId INT NULL,
+    JobId INT NOT NULL,
+    DateTime DATETIME NOT NULL,
+    Status NVARCHAR(20) CHECK (Status IN ('AVAILABLE', 'BOOKED', 'COMPLETED')) NOT NULL,
+    FOREIGN KEY (RecruiterId) REFERENCES Users(Id),
+    FOREIGN KEY (CandidateId) REFERENCES Users(Id),
+    FOREIGN KEY (JobId) REFERENCES Jobs(Id)
+);
+
+CREATE TABLE InterviewRequests (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    CandidateId INT NOT NULL,
+	JobId INT NOT NULL,
+    SlotId INT NOT NULL,
+    Status NVARCHAR(10) CHECK (Status IN ('PENDING', 'CONFIRMED', 'DECLINED')) NOT NULL DEFAULT 'PENDING',
+    RequestedAt DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (CandidateId) REFERENCES Users(Id),
+	FOREIGN KEY (JobId) REFERENCES Jobs(Id),
+    FOREIGN KEY (SlotId) REFERENCES InterviewSlots(Id)
+);
